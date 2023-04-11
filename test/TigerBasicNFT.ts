@@ -160,7 +160,6 @@ describe("TigerBasicNFT contract", function () {
   });
 
 
-  // TESTS FOR CONTRACT COMMISSION
   it("contract gets commission on all purchases and can withdraw", async function () {
     expect(await tiger.getWithdrawalBalance(deployer.address)).to.equal(ethers.utils.parseUnits("0", "ether"));
 
