@@ -6,7 +6,7 @@ import { TigerBasicNFT } from "../typechain-types";
 
 describe("TigerBasicNFT contract", function () {
   let tiger: TigerBasicNFT;
-  let deployer;
+  let deployer: SignerWithAddress;
   let artist: SignerWithAddress;
   let alice: SignerWithAddress;
   let bob: SignerWithAddress;
@@ -136,33 +136,48 @@ describe("TigerBasicNFT contract", function () {
     await tiger.connect(alice).putUpForSale(13, ethers.utils.parseEther("1.5"));
     await tiger.connect(bob).buyTiger(13, { value: ethers.utils.parseEther("1.5") });
     
-    // check pending withdrawals state to see alice has 1.425 eth to withdraw, then try withdrawing, then check balance is zeroed out
-    expect(await tiger.pendingWithdrawals(alice.address)).to.equal(ethers.utils.parseUnits("1.425", "ether"));
+    // check pending withdrawals state to see alice has 1.41 eth to withdraw, then try withdrawing, then check balance is zeroed out
+    expect(await tiger.pendingWithdrawals(alice.address)).to.equal(ethers.utils.parseUnits("1.41", "ether"));
     await tiger.connect(alice).withdrawFunds();
     expect(await tiger.pendingWithdrawals(alice.address)).to.equal(ethers.utils.parseUnits("0", "ether"));
-
-
   });
 
   // TESTS FOR ARTIST 
   it("artist balance correctly updates on purchases and for commission and withdrawal succeeds", async function () {
-    // have alice buy, list for sale, and have bob buy. Check alice can withdraw after commissions are taken
+    // have alice buy, list for sale, and have bob buy. 
     await tiger.connect(alice).buyTiger(15, { value: ethers.utils.parseEther("1") });
 
-    expect(await tiger.getWithdrawalBalance(artist.address)).to.equal(ethers.utils.parseUnits("1", "ether"));
+    expect(await tiger.getWithdrawalBalance(artist.address)).to.equal(ethers.utils.parseUnits("0.99", "ether"));
 
     await tiger.connect(alice).putUpForSale(15, ethers.utils.parseEther("2"));
     await tiger.connect(bob).buyTiger(15, { value: ethers.utils.parseEther("2") });
 
     // check that pending withdrawals is correct for alice and artist (containing original purchase and commission)
-    expect(await tiger.getWithdrawalBalance(alice.address)).to.equal(ethers.utils.parseUnits("1.9", "ether"));
-    expect(await tiger.getWithdrawalBalance(artist.address)).to.equal(ethers.utils.parseUnits("1.1", "ether"));
+    expect(await tiger.getWithdrawalBalance(alice.address)).to.equal(ethers.utils.parseUnits("1.88", "ether"));
+    expect(await tiger.getWithdrawalBalance(artist.address)).to.equal(ethers.utils.parseUnits("1.09", "ether")); // 0.99 + 0.1
 
     await tiger.connect(artist).withdrawFunds();
     expect(await tiger.getWithdrawalBalance(artist.address)).to.equal(ethers.utils.parseUnits("0", "ether"));
   });
 
 
-  // TESTS FOR CONTRACT
-  
+  // TESTS FOR CONTRACT COMMISSION
+  it("contract gets commission on all purchases and can withdraw", async function () {
+    expect(await tiger.getWithdrawalBalance(deployer.address)).to.equal(ethers.utils.parseUnits("0", "ether"));
+
+    // have alice buy, list for sale, and have bob buy.
+    await tiger.connect(alice).buyTiger(15, { value: ethers.utils.parseEther("1") });
+
+    expect(await tiger.getWithdrawalBalance(deployer.address)).to.equal(ethers.utils.parseUnits("0.01", "ether"));
+
+    await tiger.connect(alice).putUpForSale(15, ethers.utils.parseEther("2"));
+    await tiger.connect(bob).buyTiger(15, { value: ethers.utils.parseEther("2") });
+
+    // check that pending withdrawals is correct for deployer
+    expect(await tiger.getWithdrawalBalance(deployer.address)).to.equal(ethers.utils.parseUnits("0.03", "ether")); // 0.01 + 0.02
+
+    await tiger.connect(deployer).withdrawFunds();
+    expect(await tiger.getWithdrawalBalance(deployer.address)).to.equal(ethers.utils.parseUnits("0", "ether"));
+  });
+
 });

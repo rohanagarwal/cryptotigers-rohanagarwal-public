@@ -162,15 +162,12 @@ contract TigerBasicNFT {
         updateTigerOwnership(tigerId, msg.sender, saleOffer.seller);
         tigersForSale[tigerId] = SaleOffer(false, address(0), 0);
 
-        // TODO - ask macro team about whether it is better to split conditions here or just
-        // have the else case, since technically that still should work
+        pendingWithdrawals[deployer] += (msg.value * 1 / 100);
         if (saleOffer.seller == artist) {
-            pendingWithdrawals[saleOffer.seller] += msg.value;
+            pendingWithdrawals[saleOffer.seller] += (msg.value * 99 / 100);
         } else { 
-            uint256 artistCommission = msg.value * 5 / 100;
-            uint256 sellerEarning = msg.value * 95 / 100;
-            pendingWithdrawals[artist] += artistCommission;
-            pendingWithdrawals[saleOffer.seller] += sellerEarning;
+            pendingWithdrawals[artist] += (msg.value * 5 / 100);
+            pendingWithdrawals[saleOffer.seller] += (msg.value * 94 / 100);
         }
 
         emit TigerSold(saleOffer.seller, msg.sender, tigerId, saleOffer.price);
