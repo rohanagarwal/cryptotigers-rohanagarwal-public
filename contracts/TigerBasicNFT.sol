@@ -183,7 +183,7 @@ contract TigerBasicNFT {
         // must update balance BEFORE the call to guard against reentrancy 
         pendingWithdrawals[msg.sender] = 0;
 
-        // TODO - add a check for zero balance? Does this call cost us anything if the value is 0?
+        // TODO - add a check for zero balance? Does this call cost us anything from a gas perspective if the value is 0?
         (bool success, ) = payable(msg.sender).call{value: senderBalance}("");
         require(success, "Transfer failed.");
     }
