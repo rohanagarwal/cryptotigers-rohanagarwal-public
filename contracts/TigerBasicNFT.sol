@@ -173,30 +173,6 @@ contract TigerBasicNFT {
         emit TigerSold(saleOffer.seller, msg.sender, tigerId, saleOffer.price);
     }
 
-/*
-   - The contract holds all the Ether it receives from the sale of Tiger tokens. 
-     This Ether is held on behalf of the sellers and the contract keeps a record of 
-     how much is held on behalf of each seller address in the field `pendingWithdrawals`. 
-     `pendingWithdrawals` maps addresses to the amount of Ether held for each address. 
-     However as the contract stands there is no way for the owner of an address to transfer
-    their Ether out of the Tiger NFT contract.
-
-        mapping(address => uint256) public pendingWithdrawals;
-
-
-     - Add a `withdrawFunds` function which allows users to claim the Ether held on their behalf by moving it from the contract's address to their own address.
-     - Extend the provided test file `tests/TigerBasicNFT.js` to add tests for your new code
-
-     - We would like the artist to receive a royalty payment of 5% on each resale of the tokens.
-     - Extend the contract to automatically deduct a 5% artist's fee from all token sales and make this available to the artist via the `withdrawFunds` function.
-     - Extend the tests to cover this
-
-
-    - The contract should also take a 1% fee for itself.
-     - Extend the contract to automatically deduct a 1% service fee from all token sales and make this available for transfer to the adddress from which the contract was deployed. 
-       Movement of these fees to the contract deployer's address should also be performed via the `withdrawFunds` function.
-     - Extend the tests to cover this
-*/
     function getWithdrawalBalance(address owner) public view returns (uint256) {
         return pendingWithdrawals[owner];
     }
