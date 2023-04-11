@@ -162,9 +162,9 @@ contract TigerBasicNFT {
         updateTigerOwnership(tigerId, msg.sender, saleOffer.seller);
         tigersForSale[tigerId] = SaleOffer(false, address(0), 0);
 
-        pendingWithdrawals[deployer] += (msg.value * 1 / 100);
+        pendingWithdrawals[deployer] += (msg.value / 100);
         if (saleOffer.seller == artist) {
-            pendingWithdrawals[saleOffer.seller] += (msg.value * 99 / 100);
+            pendingWithdrawals[artist] += (msg.value * 99 / 100);
         } else { 
             pendingWithdrawals[artist] += (msg.value * 5 / 100);
             pendingWithdrawals[saleOffer.seller] += (msg.value * 94 / 100);

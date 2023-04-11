@@ -126,10 +126,10 @@ describe("TigerBasicNFT contract", function () {
     );
   });
 
-  // TESTS FOR USERS
   // TODO - is it useful to check alice initial balance and end balance and check that end balance > initial balance in this test?
   // technically if the initial and end balances are close, like buy for 1 and sell for 1.1, then potentially gas fees are high enough
   // that the end balance is less. So the test case may be a bit brittle. Also especially because of artist and contract commission
+  // Related: https://ethereum-waffle.readthedocs.io/en/latest/matchers.html#change-ether-balance
   it("user can sell and withdraw funds", async function () {
     // have alice buy, list for sale, and have bob buy. Check alice can withdraw after commissions are taken
     await tiger.connect(alice).buyTiger(13, { value: ethers.utils.parseEther("1") });
@@ -142,8 +142,7 @@ describe("TigerBasicNFT contract", function () {
     expect(await tiger.pendingWithdrawals(alice.address)).to.equal(ethers.utils.parseUnits("0", "ether"));
   });
 
-  // TESTS FOR ARTIST 
-  it("artist balance correctly updates on purchases and for commission and withdrawal succeeds", async function () {
+  it("artist balance correctly updates for commissions and withdrawal succeeds", async function () {
     // have alice buy, list for sale, and have bob buy. 
     await tiger.connect(alice).buyTiger(15, { value: ethers.utils.parseEther("1") });
 
@@ -154,7 +153,7 @@ describe("TigerBasicNFT contract", function () {
 
     // check that pending withdrawals is correct for alice and artist (containing original purchase and commission)
     expect(await tiger.getWithdrawalBalance(alice.address)).to.equal(ethers.utils.parseUnits("1.88", "ether"));
-    expect(await tiger.getWithdrawalBalance(artist.address)).to.equal(ethers.utils.parseUnits("1.09", "ether")); // 0.99 + 0.1
+    expect(await tiger.getWithdrawalBalance(artist.address)).to.equal(ethers.utils.parseUnits("1.09", "ether")); // 0.99 from first sale + 0.1 from second sale
 
     await tiger.connect(artist).withdrawFunds();
     expect(await tiger.getWithdrawalBalance(artist.address)).to.equal(ethers.utils.parseUnits("0", "ether"));
@@ -174,7 +173,7 @@ describe("TigerBasicNFT contract", function () {
     await tiger.connect(bob).buyTiger(15, { value: ethers.utils.parseEther("2") });
 
     // check that pending withdrawals is correct for deployer
-    expect(await tiger.getWithdrawalBalance(deployer.address)).to.equal(ethers.utils.parseUnits("0.03", "ether")); // 0.01 + 0.02
+    expect(await tiger.getWithdrawalBalance(deployer.address)).to.equal(ethers.utils.parseUnits("0.03", "ether")); // 0.01 from first sale + 0.02 from second sale
 
     await tiger.connect(deployer).withdrawFunds();
     expect(await tiger.getWithdrawalBalance(deployer.address)).to.equal(ethers.utils.parseUnits("0", "ether"));
