@@ -124,4 +124,27 @@ describe("TigerBasicNFT contract", function () {
       "not for sale",
     );
   });
+
+  // TESTS FOR USERS 
+  it("user can sell and withdraw funds", async function () {
+    // have alice buy, list for sale, and have bob buy.
+    await tiger.connect(alice).buyTiger(13, { value: ethers.utils.parseEther("1") });
+    await tiger.connect(alice).putUpForSale(13, ethers.utils.parseEther("1.5"));
+    await tiger.connect(bob).buyTiger(13, { value: ethers.utils.parseEther("1.5") });
+    
+    // check pending withdrawals state to see alice has 1.5 eth to withdraw, then try withdrawing, then check balance is zeroed out, and that alice has > 10,000 eth now
+    expect(await tiger.pendingWithdrawals(alice.address)).to.equal(ethers.utils.parseUnits("1.5", "ether"));
+    await tiger.connect(alice).withdrawFunds();
+    expect(await tiger.pendingWithdrawals(alice.address)).to.equal(ethers.utils.parseUnits("0", "ether"));
+
+    // TODO - question for macro team - is it useful to check alice initial balance and end balance and check that end balance > initial balance in this test?
+    // technically if the initial and end balances are close, like buy for 1 and sell for 1.01, then potentially gas fees are high enough
+    // that the end balance is less. So the test case may be a bit brittle
+  });
+  
+  // TESTS FOR ARTIST 
+
+
+
+  // TESTS FOR CONTRACT
 });

@@ -163,4 +163,30 @@ contract TigerBasicNFT {
         pendingWithdrawals[saleOffer.seller] += msg.value;
         emit TigerSold(saleOffer.seller, msg.sender, tigerId, saleOffer.price);
     }
+
+/*
+   - The contract holds all the Ether it receives from the sale of Tiger tokens. 
+     This Ether is held on behalf of the sellers and the contract keeps a record of 
+     how much is held on behalf of each seller address in the field `pendingWithdrawals`. 
+     `pendingWithdrawals` maps addresses to the amount of Ether held for each address. 
+     However as the contract stands there is no way for the owner of an address to transfer
+    their Ether out of the Tiger NFT contract.
+
+        mapping(address => uint256) public pendingWithdrawals;
+
+
+     - Add a `withdrawFunds` function which allows users to claim the Ether held on their behalf by moving it from the contract's address to their own address.
+     - Extend the provided test file `tests/TigerBasicNFT.js` to add tests for your new code
+*/
+    function withdrawFunds() external {
+        uint256 senderBalance = pendingWithdrawals[msg.sender];
+
+        // must update balance BEFORE the call to guard against reentrancy 
+        pendingWithdrawals[msg.sender] = 0;
+
+        // TODO - add a check for zero balance? Does this call cost us anything if the value is 0?
+        (bool success, ) = payable(msg.sender).call{value: senderBalance}("");
+        require(success, "Transfer failed.");
+
+    }
 }
