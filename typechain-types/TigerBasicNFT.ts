@@ -24,6 +24,7 @@ export interface TigerBasicNFTInterface extends utils.Interface {
     "buyTiger(uint256)": FunctionFragment;
     "getBalance(address)": FunctionFragment;
     "getOwner(uint256)": FunctionFragment;
+    "getWithdrawalBalance(address)": FunctionFragment;
     "isForSale(uint256)": FunctionFragment;
     "pendingWithdrawals(address)": FunctionFragment;
     "putUpForSale(uint256,uint256)": FunctionFragment;
@@ -42,6 +43,10 @@ export interface TigerBasicNFTInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "getOwner",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getWithdrawalBalance",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "isForSale",
@@ -79,6 +84,10 @@ export interface TigerBasicNFTInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "buyTiger", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getBalance", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getOwner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getWithdrawalBalance",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "isForSale", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pendingWithdrawals",
@@ -182,6 +191,11 @@ export interface TigerBasicNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    getWithdrawalBalance(
+      owner: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     isForSale(
       tigerId: BigNumberish,
       overrides?: CallOverrides
@@ -236,6 +250,11 @@ export interface TigerBasicNFT extends BaseContract {
 
   getOwner(tigerId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
+  getWithdrawalBalance(
+    owner: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   isForSale(
     tigerId: BigNumberish,
     overrides?: CallOverrides
@@ -286,6 +305,11 @@ export interface TigerBasicNFT extends BaseContract {
     getBalance(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     getOwner(tigerId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    getWithdrawalBalance(
+      owner: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     isForSale(
       tigerId: BigNumberish,
@@ -378,6 +402,11 @@ export interface TigerBasicNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getWithdrawalBalance(
+      owner: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     isForSale(
       tigerId: BigNumberish,
       overrides?: CallOverrides
@@ -430,6 +459,11 @@ export interface TigerBasicNFT extends BaseContract {
 
     getOwner(
       tigerId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getWithdrawalBalance(
+      owner: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

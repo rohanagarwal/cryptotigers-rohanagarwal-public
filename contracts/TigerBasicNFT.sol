@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.9;
+import "hardhat/console.sol";
 
 /*
    NFT Contract along the lines of CryptoPunks. For the original see:
@@ -160,7 +161,18 @@ contract TigerBasicNFT {
         require(saleOffer.seller == getOwner(tigerId), "seller no longer owns");
         updateTigerOwnership(tigerId, msg.sender, saleOffer.seller);
         tigersForSale[tigerId] = SaleOffer(false, address(0), 0);
-        pendingWithdrawals[saleOffer.seller] += msg.value;
+
+        // TODO - ask macro team about whether it is better to split conditions here or just
+        // have the else case, since technically that still should work
+        if (saleOffer.seller == artist) {
+            pendingWithdrawals[saleOffer.seller] += msg.value;
+        } else { 
+            uint256 artistCommission = msg.value * 5 / 100;
+            uint256 sellerEarning = msg.value * 95 / 100;
+            pendingWithdrawals[artist] += artistCommission;
+            pendingWithdrawals[saleOffer.seller] += sellerEarning;
+        }
+
         emit TigerSold(saleOffer.seller, msg.sender, tigerId, saleOffer.price);
     }
 
@@ -177,7 +189,21 @@ contract TigerBasicNFT {
 
      - Add a `withdrawFunds` function which allows users to claim the Ether held on their behalf by moving it from the contract's address to their own address.
      - Extend the provided test file `tests/TigerBasicNFT.js` to add tests for your new code
+
+     - We would like the artist to receive a royalty payment of 5% on each resale of the tokens.
+     - Extend the contract to automatically deduct a 5% artist's fee from all token sales and make this available to the artist via the `withdrawFunds` function.
+     - Extend the tests to cover this
+
+
+    - The contract should also take a 1% fee for itself.
+     - Extend the contract to automatically deduct a 1% service fee from all token sales and make this available for transfer to the adddress from which the contract was deployed. 
+       Movement of these fees to the contract deployer's address should also be performed via the `withdrawFunds` function.
+     - Extend the tests to cover this
 */
+    function getWithdrawalBalance(address owner) public view returns (uint256) {
+        return pendingWithdrawals[owner];
+    }
+
     function withdrawFunds() external {
         uint256 senderBalance = pendingWithdrawals[msg.sender];
 
@@ -187,6 +213,5 @@ contract TigerBasicNFT {
         // TODO - add a check for zero balance? Does this call cost us anything if the value is 0?
         (bool success, ) = payable(msg.sender).call{value: senderBalance}("");
         require(success, "Transfer failed.");
-
     }
 }
